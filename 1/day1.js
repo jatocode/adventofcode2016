@@ -12,11 +12,15 @@ function read(file, callback) {
 
 read(args[0], function(data) {
     var dirs = data.split(",");
+
     var compass = 0; // 0 N, 1E, 2S, 3W
     var c = [[0,1], [1,0], [0,-1], [-1,0]];
-    var pos = [0,0];
+
     var visited = Array.matrix(200,200,false);
     var revisit = false;
+
+    var x = 0;
+    var y = 0;
 
     for(var index in dirs) {
         var v = dirs[index].trim();
@@ -34,43 +38,33 @@ read(args[0], function(data) {
 
         var move = c[compass];
 
-        // Mark it
-        for(var i=0; i<l && !revisit; i++) {
-            var x = pos[0] + i*move[0];
-            var y = pos[1] + i*move[1];
-            revisit = checkVisit(x,y,visited);
+        // Mark and move
+        for(var i=0; i<l ; i++) {
+            x += move[0];
+            y += move[1];
+
+            if(visited[x][y] == true) {
+                console.log('REVISIT!');
+                // Part 2
+                revisit = true;
+                break;
+            }
             visited[x][y] = true;
         }
 
-        // Move it
-        pos[0] += l * move[0];
-        pos[1] += l * move[1];
+        if(revisit) {
+            break;
+        }
 
     }
 
-    if(!revisit) {
-        // Calc using taxicab distance formula
-        var x1 = pos[0];
-        var y1 = pos[1];
-        var distance = Math.abs(x1 - 0) + Math.abs(y1 - 0);
+    // Calc using taxicab distance formula
+    var distance = Math.abs(x - 0) + Math.abs(y - 0);
 
-        console.log('Distance to Easter Bunny HQ: ' + distance);
-    }
+    console.log('Distance to Easter Bunny HQ: ' + distance);
 });
 
-function checkVisit(x,y, visited) {
-    if(visited[x][y] == true) {
-        console.log('REVISIT at ' + x + ', ' + y);
-
-        // Calc using taxicab distance formula
-        var distance = Math.abs(x - 0) + Math.abs(y - 0);
-
-        console.log('Distance to revisited Easter Bunny HQ: ' + distance);
-        return true;
-    }
-    return false;
-}
-
+// Snodde den här pga 2d-matriser i javascript verkar kokt i skit
 Array.matrix = function(numrows, numcols, initial) {
     var arr = [];
     for (var i = -numrows; i < numrows; ++i) {
