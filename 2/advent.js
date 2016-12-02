@@ -12,19 +12,18 @@ function read(file, callback) {
 
 read(args[0], function(data) {
     var lines = data.split("\n");
-    var key = { x:0, y:2 };
-    var code = "";
+    var key = { x:0, y:2 }; // Start at 5
     var move = [0,0];
+    var code = "";
 
     for(var line in lines) {
         var instructions = lines[line].split("");
-        var found = '';
         if (instructions.length == 0) {
-            break;
+            break; // No empty lines
         }
+
         for(var index in instructions) {
             var inst = instructions[index];
-            var test = {};
             switch(inst) {
                 case "D":
                     move = [0,1];
@@ -33,53 +32,54 @@ read(args[0], function(data) {
                     move = [0,-1];
                     break;
                 case "L":
-                    move = [-1, 0];
+                    move = [-1,0];
                     break;
                 case "R":
-                    move = [1, 0];
+                    move = [1,0];
                     break;
             }
+            var test = {};
             test.x = key.x + move[0];
             test.y = key.y + move[1];
-            found = keypad(test.x, test.y);
-            if(found != undefined) {
+            if(keypad(test) != -1) {
                 key.x = test.x;
                 key.y = test.y;
             }
         }
-        found = keypad(key.x, key.y);    // EOL
-        code += found;
+        code += keypad(key);
     }
 
     console.log('The code is: ' + code);
 });
 
-function keypad(x, y) {
+function keypad(key) {
+    var x = key.x;
+    var y = key.y;
+
     if(x == undefined || y == undefined) {
         return 'X';
     }
 
-    var keys1 = [ [1,2,3], 
-                 [4,5,6], 
-                 [7,8,9] ];
+    var keys_part1 = [ [1,2,3], 
+                       [4,5,6], 
+                       [7,8,9] ];
 
     var keys = [[0,0,1,0,0],
                 [0,2,3,4,0],
                 [5,6,7,8,9],
-               [0,'A','B','C',0],
+             [0,'A','B','C',0],
                [0,0,'D',0,0] ];
 
-
     if(y < 0 || y >= keys.length) {
-        return undefined;
+        return -1;
     }
 
     if(x < 0 || x >= keys[y].length) {
-        return undefined;
+        return -1;
     }
     
     if(keys[y][x] == 0) {
-        return undefined;
+        return -1;
     }
 
     // console.log(x + ',' + y + '-> ' + keys[y][x]);
