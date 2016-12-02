@@ -12,7 +12,7 @@ function read(file, callback) {
 
 read(args[0], function(data) {
     var lines = data.split("\n");
-    var key = { x:1, y:1 };
+    var key = { x:0, y:2 };
     var code = "";
 
     for(var line in lines) {
@@ -50,7 +50,7 @@ read(args[0], function(data) {
                     break;
             }
         }
-        found = keypad(key.x, key.y);    
+        found = keypad(key.x, key.y);    // EOL
         code += found;
     }
 
@@ -62,9 +62,16 @@ function keypad(x, y) {
         return 'X';
     }
 
-    var keys = [ [1,2,3], 
+    var keys1 = [ [1,2,3], 
                  [4,5,6], 
                  [7,8,9] ];
+
+    var keys = [[0,0,1,0,0],
+                [0,2,3,4,0],
+                [5,6,7,8,9],
+               [0,'A','B','C',0],
+               [0,0,'D',0,0] ];
+
 
     if(y < 0 || y >= keys.length) {
         return undefined;
@@ -74,6 +81,11 @@ function keypad(x, y) {
         return undefined;
     }
     
+    if(keys[y][x] == 0) {
+        return undefined;
+    }
+
+    // console.log(x + ',' + y + '-> ' + keys[y][x]);
     return keys[y][x];
 }
 
