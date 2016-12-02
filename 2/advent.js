@@ -14,6 +14,7 @@ read(args[0], function(data) {
     var lines = data.split("\n");
     var key = { x:0, y:2 };
     var code = "";
+    var move = [0,0];
 
     for(var line in lines) {
         var instructions = lines[line].split("");
@@ -23,31 +24,27 @@ read(args[0], function(data) {
         }
         for(var index in instructions) {
             var inst = instructions[index];
+            var test = {};
             switch(inst) {
                 case "D":
-                    found = keypad(key.x, key.y + 1);
-                    if(found != undefined ) {
-                        key.y++;
-                    }
+                    move = [0,1];
                     break;
                 case "U":
-                    found = keypad(key.x, key.y - 1);
-                    if(found != undefined ) {
-                        key.y--;
-                    }
+                    move = [0,-1];
                     break;
                 case "L":
-                    found = keypad(key.x - 1, key.y);
-                    if(found != undefined ) {
-                        key.x--;
-                    }
+                    move = [-1, 0];
                     break;
                 case "R":
-                    found = keypad(key.x + 1, key.y);
-                    if(found != undefined ) {
-                        key.x++;
-                    }
+                    move = [1, 0];
                     break;
+            }
+            test.x = key.x + move[0];
+            test.y = key.y + move[1];
+            found = keypad(test.x, test.y);
+            if(found != undefined) {
+                key.x = test.x;
+                key.y = test.y;
             }
         }
         found = keypad(key.x, key.y);    // EOL
