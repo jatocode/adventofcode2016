@@ -11,5 +11,7 @@ function read(file, callback) {
 }
 
 read(args[0], function(data) {
+    var inst = data.trim().split("");
+    console.log(JSON.stringify(inst));
 
 });
