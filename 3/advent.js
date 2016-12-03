@@ -28,5 +28,42 @@ read(args[0], function(data) {
         // console.log(JSON.stringify(lengths));
     }
     console.log('Trianglar:' + triangles);
+
+    // Part 2
+    triangles = 0;
+    for(var line=0;line<lines.length;line+=3) {
+        var vertical = [];
+        for(var i=0;i<3 && line+i<lines.length;i++) {
+            var lengths = lines[line + i].split(' ');
+            lengths = lengths.filter(function(n){ return n != "" }); 
+            lengths = lengths.map(function(n){ return parseInt(n) });     
+
+            vertical.push(lengths);
+        }
+
+        // Lånade en transponera-array från: 
+        // http://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript#comment51565810_17428705
+        var rotated = vertical[0].map(function(col, i) { 
+          return vertical.map(function(row) { 
+            return row[i] 
+          })
+        });
+
+        //console.log(JSON.stringify(rotated));
+
+        if(rotated.length == 0) break; 
+
+        for(var i=0;i<3;i++) {
+            // Summan av två  måste vara större än den 3:e?
+            if(rotated[i][0] + rotated[i][1] > rotated[i][2] &&
+               rotated[i][1] + rotated[i][2] > rotated[i][0] &&
+               rotated[i][2] + rotated[i][0] > rotated[i][1]) {
+                triangles++;
+            }
+        }
+        
+    }
+    console.log('Trianglar på vertikalen:' + triangles);
+
 });
 
