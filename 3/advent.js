@@ -18,7 +18,7 @@ read(args[0], function(data) {
         lengths = lengths.filter(function(n){ return n != "" }); 
         lengths = lengths.map(function(n){ return parseInt(n) }); 
 
-        // Summan av två  måste vara större än den 3:e?
+        // Summan av två  måste vara större än den 3:e
 
         if(lengths[0] + lengths[1] > lengths[2] &&
            lengths[1] + lengths[2] > lengths[0] &&
@@ -53,11 +53,12 @@ read(args[0], function(data) {
 
         if(rotated.length == 0) break; 
 
-        for(var i=0;i<3;i++) {
-            // Summan av två  måste vara större än den 3:e?
-            if(rotated[i][0] + rotated[i][1] > rotated[i][2] &&
-               rotated[i][1] + rotated[i][2] > rotated[i][0] &&
-               rotated[i][2] + rotated[i][0] > rotated[i][1]) {
+        for(var r in rotated) {
+            var vert = rotated[r];
+            // Summan av två  måste vara större än den 3:e
+            if(vert[0] + vert[1] > vert[2] &&
+               vert[1] + vert[2] > vert[0] &&
+               vert[2] + vert[0] > vert[1]) {
                 triangles++;
             }
         }
