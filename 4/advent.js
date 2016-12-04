@@ -21,7 +21,7 @@ read(args[0], function(data) {
 
 		if(room.length == 0) break;
 
-		room = room.replace(/-/g,''); // Who cares about dashes
+		//room = room.replace(/-/g,''); // Who cares about dashes
 		var regexp = /([a-z-]+)(\d+)\[(.*)\]/;
 		var roomdata = room.match(regexp);
 		var encrypted = roomdata[1];
@@ -36,10 +36,12 @@ read(args[0], function(data) {
 		// Vill ha en array för att sortera
 		var ca = [];
 		Object.keys(count).forEach(function(k) {
-			var letter = [];
-			letter.push(k);
-			letter.push(count[k]);
-			ca.push(letter);
+			if(k != '-') {		// Skip dashes		
+				var letter = [];
+				letter.push(k);
+				letter.push(count[k]);
+				ca.push(letter);
+			}
 		});
 		// Sortera på siffra och sen alfabet
 		ca.sort(function freq(a,b) {
@@ -49,7 +51,7 @@ read(args[0], function(data) {
 			if(a[0] > b[0]) return 1;
 			return 0;
 		});
-		
+
 		// Gör sträng av första fem?
 		var code = '';
 		for(var i=0;i<5;i++) {
@@ -59,11 +61,32 @@ read(args[0], function(data) {
 
 		if(code == checksum) {
 			idSum += ID;
+			var clear = caesar(encrypted, ID);
+			//console.log('#' + clear + '#');
+			if(clear.startsWith('north')) { // Fuskade med grep för att se exakt sträng
+				console.log('SectorID for North Pole storage:' + ID);
+			}
 		}
 
 	}
 
-	console.log('Sector ID sum = ' + idSum);
+	console.log('SectorID sum = ' + idSum);
 
 });
+
+function caesar(encrypted, sectorID) {
+	var clear = '';
+	for(var i=0;i<encrypted.length;i++) {
+		var ascii = encrypted.charCodeAt(i);
+		if(encrypted[i] != '-') {
+			var ceasar = ((ascii - 97 + sectorID) % 26) + 97;
+			clear += String.fromCharCode(ceasar);
+		} else {
+			clear += ' ';
+		}
+	};
+
+	//console.log(encrypted + ' -> ' + clear);
+	return clear;
+}
 
