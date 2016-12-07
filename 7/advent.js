@@ -24,38 +24,38 @@ read(args[0], function(data) {
         var stop = 0;
         var hstart = 0;
         var hstop = 0;
-        var abbaInIP = false;
-        var abbaInHypernet = false;
+        var abbaSuperset = false;
+        var abbaHypernet = false;
         for(var i=0;i<ip7.length;i++) {
             if(ip7[i] == '[') {
                 hstart = i+1;
                 stop = i;
-                abbaInIP |= checkABBA(ip7.substring(start, stop));
+                abbaSuperset |= checkABBA(ip7.substring(start, stop));
             }
             if(ip7[i] == ']') {
                 hstop = i;
                 start = i+1;
-                abbaInHypernet |= checkABBA(ip7.substring(hstart, hstop));
+                abbaHypernet |= checkABBA(ip7.substring(hstart, hstop));
             }
 
         }
         if(start < ip7.length) {
-            abbaInIP |= checkABBA(ip7.substring(start, ip7.length));
+            abbaSuperset |= checkABBA(ip7.substring(start, ip7.length));
         }
 
-        if(abbaInIP && !abbaInHypernet) {
+        if(abbaSuperset && !abbaHypernet) {
             tls++;
         }
 
         // Part 2
-        var abas = [];
+        var superset = [];
         start = stop = hstart = hstop = 0;
         for(var i=0;i<ip7.length;i++) {
             if(ip7[i] == '[') {
                 stop = i;
                 var aba = checkABA(ip7.substring(start, stop));
                 if(aba.length > 0) {
-                    abas = abas.concat(aba);
+                    superset = superset.concat(aba);
                 }   
             }
             if(ip7[i] == ']') {
@@ -64,8 +64,9 @@ read(args[0], function(data) {
         }
         if(start < ip7.length) {
             var aba = checkABA(ip7.substring(start, ip7.length+1));
-            if(aba.length > 0)
-                abas = abas.concat(aba);
+            if(aba.length > 0) {
+                superset = superset.concat(aba);
+            }
         }
 
         start = stop = hstart = hstop = 0;
@@ -76,8 +77,8 @@ read(args[0], function(data) {
             }
             if(ip7[i] == ']') {
                 hstop = i;
-                for(a in abas) {
-                    var aba = abas[a];
+                for(a in superset) {
+                    var aba = superset[a];
                     if(checkBAB(ip7.substring(hstart,hstop), aba)) {
                         sslFound = true;
                     }
