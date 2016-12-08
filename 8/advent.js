@@ -57,7 +57,7 @@ function countDisplay() {
 function drawRect(line) {
     var regex = /rect.(\d+)x(\d+)/;
     var size = line.match(regex);
-//    console.log('R: ' + size[1] + 'x' + size[2]);
+    //console.log('R: ' + size[1] + 'x' + size[2]);
     for(var y=0; y<size[2] ; y++) {
         for(var x=0; x<size[1]; x++) {
             display[x][y] = 1;
@@ -66,8 +66,8 @@ function drawRect(line) {
 }
 
 function rotate(line) {
-    var regex = /rotate.(column|row).(x|y)=(\d+).by.(\d)/
-        var rot = line.match(regex);
+    var regex = /rotate.(column|row).(x|y)=(\d+).by.(\d+)/
+    var rot = line.match(regex);
 
     var xy = rot[2];
     var index = rot[3];
