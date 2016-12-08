@@ -26,38 +26,30 @@ read(args[0], function(data) {
             rotate(line);
         }
     }
-    showDisplay();
-    console.log('Number of lit pixels: ' + countDisplay());
+    var lit = showDisplay();
+    console.log('Number of lit pixels: ' + lit);
 
 });
 
 function showDisplay() {
+    var lit = 0;
     for(var y=0;y<display[0].length;y++) {
         var row = '';
         for(var x=0;x<display.length;x++) {
             row += display[x][y]==0?'.':'#';
+            if(display[x][y] == 1) {
+                lit++;
+            }
         }
         console.log(row);
     }
     console.log();
-}
-
-function countDisplay() {
-    var lit = 0;
-    for(var y=0;y<display[0].length;y++) {
-        for(var x=0;x<display.length;x++) {
-            if(display[x][y]==1) {
-                lit++;
-            }
-        }
-    }
     return lit;
 }
 
 function drawRect(line) {
     var regex = /rect.(\d+)x(\d+)/;
     var size = line.match(regex);
-    //console.log('R: ' + size[1] + 'x' + size[2]);
     for(var y=0; y<size[2] ; y++) {
         for(var x=0; x<size[1]; x++) {
             display[x][y] = 1;
@@ -75,19 +67,15 @@ function rotate(line) {
 
     switch(xy) {
         case 'x':
-//            console.log('Shifting col ' + index + ' with ' + by + ' steps');
             for(var n=0; n < by ; n++) {
                 display[index].unshift(display[index].pop());
             }
-//            showDisplay();
             break;
         case 'y':
- //           console.log('Shifting row ' + index + ' with ' + by + ' steps');
             var row=[];
             for(var i=0; i < display.length ;i++) {
                 row.push(display[i][index]);
             }
-            //console.log(JSON.stringify(row));
             for(var n=0; n < by ; n++) {
                 row.unshift(row.pop());
             }
@@ -95,7 +83,6 @@ function rotate(line) {
             for(var i=0; i < display.length ;i++) {
                 display[i][index] = row[i];
             }
-            //showDisplay();
             break;
         default:
             break;
