@@ -14,63 +14,38 @@ function read(file, callback) {
 
 read(args[0], function(data) {
     var lines = data.split("\n");
-    var total = 0;
-    for(var i in lines) {
-        var line = lines[i];
 
-        if(line.length == 0) break;
-        var regex = /((\d+)x(\d+))/g
-        var matches = [];
-        var markers = [];
+    var tot = 0;
+    for(var l=0; l < lines.length ; l++) {
+        var line = lines[l];
+        var decompressed = '';
 
-        while ((matches = regex.exec(line)) !== null) {
-            var d = { length: parseInt(matches[2]), 
-                repeats: parseInt(matches[3]), 
-                start1:  parseInt(matches.index) - 1,
-                mlen: matches[0].length + 2,
-                start: parseInt(matches.index) + parseInt(matches[0].length) +1 };
+       // console.log(line);
+        for(var i=0; i < line.length ; i++) {
+            if(line[i] == '(') {
+                // Time to decompress
+                var startmark = line.substring(i);
+                var regex = /(\d+)x(\d+)/;
+                var match = startmark.match(regex);
+                var len = parseInt(match[1]);
+                var repeat = parseInt(match[2]);
+                decompressed += expand(startmark, match[0].length + 2, len, repeat );
 
-            markers.push(d);
-        }
-
-        var expanded = '';
-        var index = 0;
-        var end = 0;
-        var len = 0;
-        var mlen = 0;
-        for(i in markers) {
-            var mark = markers[i];
-            var exp = '';
-            //console.log(mark);
-            if(i == 0) {
-                exp = expand(line, mark);
-                expanded += line.substring(index, mark.start1) + exp;
-                index += mark.start1 + mark.mlen + mark.length;
-            } else if(mark.start > markers[i-1].start + markers[i-1].length){
-                exp = expand(line, mark);
-                expanded += line.substring(index, mark.start1) + exp;
-                index += mark.start1 + mark.mlen+ mark.length;
+                i+= len + match[0].length + 1;
+            } else {
+                decompressed += line[i];
             }
-            end = mark.start1;
-            len = mark.length;
-            mlen = mark.mlen;
         }
-        expanded += line.substring(end+len+mlen);
-        total += expanded.length;
-        console.log(expanded + ' ' + expanded.length);
+        console.log(decompressed + ' ' + decompressed.length);
+        tot += decompressed.length;
     }
-    console.log('Total length: ' + total);
-
+    console.log('Total:' + tot);
 });
 
-function expand(data, mark) {
+function expand(data, start, length, repeat) {
     var expanded = '';
-    var start = mark.start;
-    var end = start + mark.length;
-    var repeats = mark.repeats;
-    var decomp = data.substring(start, end);
-
-    for(var i=0; i < repeats; i++) {
+    var decomp = data.substring(start, start + length);
+    for(var i=0; i < repeat; i++) {
         expanded += decomp;
     }
 
