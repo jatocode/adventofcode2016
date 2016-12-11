@@ -14,41 +14,40 @@ function read(file, callback) {
 
 read(args[0], function(data) {
     var lines = data.split("\n");
-    for(var i in lines) {
-        var line = lines[i];
+    var tot = 0;
+    for(var l=0; l < lines.length ; l++) {
+        var line = lines[l];
+        var decompressed = '';
 
-        if(line.length == 0) break;
-        var regex = /((\d+)x(\d+))/g
-        var matches = [];
-        var markers = [];
+       // console.log(line);
+        for(var i=0; i < line.length ; i++) {
+            if(line[i] == '(') {
+                // Time to decompress
+                var startmark = line.substring(i);
+                var regex = /(\d+)x(\d+)/;
+                var match = startmark.match(regex);
+                var len = parseInt(match[1]);
+                var repeat = parseInt(match[2]);
+                decompressed += expand(startmark, match[0].length + 2, len, repeat );
 
-        while ((matches = regex.exec(line)) !== null) {
-            var d = { length: parseInt(matches[2]), 
-                      repeats: parseInt(matches[3]), 
-                      i: parseInt(matches.index) + parseInt(matches[0].length) +1 };
-            markers.push(d);
-        }
-
-        var expanded = '';
-        for(i in markers) {
-            var mark = markers[i];
-            if(i > 0) {
-                
+                i+= len + match[0].length + 1;
+            } else {
+                decompressed += line[i];
             }
-            console.log(expand(line, mark));
         }
+        console.log(decompressed + ' ' + decompressed.length);
+        tot += decompressed.length;
     }
-
+    console.log('Total:' + tot);
 });
 
-function expand(data, mark) {
+function expand(data, start, length, repeat) {
     var expanded = '';
-    var start = mark.i;
-    var end = start + mark.length;
-    var repeats = mark.repeats;
-    var decomp = data.substring(start, end);
+    var decomp = data.substring(start, start + length);
 
-    expanded = decomp;
+    for(var i=0; i < repeat; i++) {
+        expanded += decomp;
+    }
 
     return expanded;
 }
