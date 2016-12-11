@@ -1,6 +1,10 @@
 var fs = require('fs');
 var args = process.argv.slice(2);
 
+var floors = new Array(4);
+var hiss = 1;
+var steps = 0;
+
 function read(file, callback) {
     fs.readFile(file, 'utf8', function(err, data) {
         if (err) {
@@ -13,16 +17,28 @@ function read(file, callback) {
 read(args[0], function(data) {
     var lines = data.split("\n");
 
-    var floors = new Array(4);
     
     for(var l=0; l < lines.length ; l++) {
         var line = lines[l];
         floors[l] = parseFloor(line);
     }
-    
-    console.log(JSON.stringify(floors));
+
+    displayFloors();
 
 });
+
+function displayFloors() {
+   for(var f=floors.length-1; f >= 0; f--) {
+        var fl = 'F'+(f+1)+' ';
+        var all = floors[f][0].concat(floors[f][1]);
+        for(var i=0; i < 10; i++) {
+            var u = all[i] == undefined?'  . ':' ' + all[i] + ' ';
+            fl += u;
+        }
+        console.log(fl);
+    }
+    console.log('H: ' + hiss + ' (' + steps +')');
+}
 
 function parseFloor(line) {
     var microchips = [];
@@ -35,7 +51,7 @@ function parseFloor(line) {
         generators.push('TG');
     }
     if(line.indexOf('promethium generator') != -1) {
-        generators.push('PRG');
+        generators.push('OG');
     }
     if(line.indexOf('ruthenium generator') != -1) {
         generators.push('RG');
@@ -51,7 +67,7 @@ function parseFloor(line) {
         microchips.push('TC');
     }
     if(line.indexOf('promethium-compatible') != -1) {
-        microchips.push('PRC');
+        microchips.push('OC');
     }
     if(line.indexOf('ruthenium-compatible') != -1) {
         microchips.push('RC');
