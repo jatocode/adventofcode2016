@@ -1,7 +1,23 @@
-var fav = 1352;
+var args = process.argv.slice(2);
 
-console.log(isWall(0,1));
-console.log(isWall(0,2));
+var fav = 1352;
+var x = 31;
+var y = 39;
+
+if(args.length > 0) {
+    fav = args[0];
+    x = args[1];
+    y = args[2];
+}
+
+console.log('Steps needed to reach (' + x + ',' + y + ') with fav ' + fav +' : ' + maze(x, y));
+
+function maze(destX, destY) {
+    isWall(0,1);
+
+    return 0;
+}
+
 
 function isWall(x, y) {
     var f = x*x + 3*x +2*x*y + y + y*y;
