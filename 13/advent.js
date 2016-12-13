@@ -15,6 +15,7 @@ var steps = 0;
 // Implement simple pathfinder
 var queue = [];
 queue.push({x:0,y:0,w:0});
+
 function maze(q) {
     var x = q.x;
     var y = q.y;
@@ -31,16 +32,19 @@ function maze(q) {
 
     for(n in nbs) {
         var nb = nbs[n];
+        var wall = isWall(nb.x, nb.y);
         if (nb.x < 0 || nb.y < 0) {
             //   console.log('Negative: ' + JSON.stringify(nb));
-        } else if(isWall(nb.x, nb.y)) {
+        } else if(wall) {
             //   console.log('isWall:' + JSON.stringify(nb));
         } else if(inQueueAndHeavy(nb)) {
             // Find nb in queue and compare weight
           //  console.log('Heavy: ' + JSON.stringify(nb));
         } else {
+            nb.parent = [x,y];
             addToQ(nb);
         }
+
     }
 
     return false;
@@ -50,18 +54,51 @@ function find() {
     var steps = 0;
     var found = false;
     var i = 0;
-    while(!found && steps++<40) {
+    while(!found && steps++<500) {
         for(i in queue) {
             var q = queue[i];
             found = maze(q);
             if(found) break;
         }
-        display(q.x, q.y);
+        //display(q.x, q.y);
     }
-    return steps;
+
+
+
+    var path = [];
+    var parent; // = queue[queue.length -1].parent;
+    for(i in queue) {
+        var q = queue[i];
+        if(q.x == 7 && q.y==4) {
+            parent = q.parent;
+            path.push(q);
+            break;
+        }
+    }
+    var found = false;
+    var st = 100;
+    while(!found && st-->0) {
+        //console.log(parent);
+        for(i in queue) {
+            var q = queue[i];
+            if(parent != undefined && parent[0] != undefined && parent[1] && q.x == parent[0] && q.y == parent[1]) {
+               // console.log(parent + "f->" + q.parent);
+                parent = q.parent;
+                path.push(q);
+            }
+        }
+        if(parent != undefined && parent.x == 0 && parent.y == 0) {
+            found = true;
+        }
+    }
+    console.log(path);
+    return path.length;
 }
 
-display(0,0);
+isWall(0,1);
+isWall(1,0);
+display(10,10);
+
 console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + find());
 
 function addToQ(c) {
@@ -83,10 +120,21 @@ function inQueueAndHeavy(c) {
     for(var i in queue) {
         var p = queue[i];
         if(p.x == c.x && p.y == c.y && (p.w >= c.w)) {
-            return true;
+            return p.w;
         }
     }
-    return false;
+    return 0;
+}
+
+function isWall(x, y) {
+    var f = x*x + 3*x + 2*x*y + y + y*y;
+    f = f + parseInt(fav);
+
+    var count = krCount(f);
+    var wall = (count % 2) != 0;
+    //console.log(f + ': ' + f.toString(2) + ' -> ' + count);
+   // console.log('(' + x + ',' + y + ') is ' + (wall?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
+    return wall;
 }
 
 function display(a,b) {
@@ -94,41 +142,29 @@ function display(a,b) {
 //    console.log();
 //    console.log(a,':',b);
 //    return;
+    console.log('  0123456789');
     for(var y=0;y<7;y++) {
-        var row = '';
+        var row = y + ' ';
         for(var x=0;x<10;x++) {
-            var w = 'O';
-            for(i in queue) {
-                var q = queue[i];
-                if(x == q.x && y == q.y) {
-                    a = q.x;
-                    b = q.y;
-                 //   w = q.w;
-                    break;
-                }
-            }
-            if(x == a && y == b) {
-                row += w;
-            } else {
+            // var w = 'O';
+            // for(i in queue) {
+            //     var q = queue[i];
+            //     if(x == q.x && y == q.y) {
+            //         a = q.x;
+            //         b = q.y;
+            //      //   w = q.w;
+            //         break;
+            //     }
+            // }
+            // if(x == a && y == b) {
+            //     row += w;
+            // } else {
                 row += isWall(x,y)?'#':'.';
-            }
+            // }
         }
         console.log(row);
     }
     console.log();
-}
-
-function isWall(x, y) {
-    var f = x*x + 3*x +2*x*y + y + y*y;
-    f = f + fav;
-
-    var count = krCount(f);
-    // console.log(f + ': ' + f.toString(2) + ' -> ' + count);
-    var wall = (count % 2) != 0;
-
-    //console.log('(' + x + ',' + y + ') is ' + (wall?'an open space':'a wall'));
-    return wall;
-
 }
 
 // Snodde en K&R algoritm for att rakna ettor
@@ -137,3 +173,4 @@ function krCount(value) {
     for (count = 0; value != 0; count++, value &= value-1);
     return count;
 }
+
