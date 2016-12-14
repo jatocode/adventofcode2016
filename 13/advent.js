@@ -11,119 +11,83 @@ if(args.length > 0) {
 }
 
 var steps = 0;
+/*
+Breadth-First-Search(Graph, root):
+    
+    for each node n in Graph:            
+        n.distance = INFINITY        
+        n.parent = NIL
 
-// Implement simple pathfinder
-var queue = [];
-queue.push({x:0,y:0,w:0});
+    create empty queue Q      
 
-function maze(q) {
-    var x = q.x;
-    var y = q.y;
-    var w = parseInt(q.w);
-    if(x == destx && y == desty) {
-        console.log('FF');
-        return true;
-    }
+    root.distance = 0
+    Q.enqueue(root)                      
 
-    var nbs = [{x:x+1, y:y,   w:w+1},
-    {x:x,   y:y+1, w:w+1},
-    {x:x-1, y:y,   w:w+1},
-    {x:x,   y:y-1, w:w+1}];
+    while Q is not empty:        
+        current = Q.dequeue()
+        for each node n that is adjacent to current:
+            if n.distance == INFINITY:
+                n.distance = current.distance + 1
+                n.parent = current
+                Q.enqueue(n)
+*/
+var start = { xy:[0,0], parent: undefined };
 
-    for(n in nbs) {
-        var nb = nbs[n];
-        var wall = isWall(nb.x, nb.y);
-        if (nb.x < 0 || nb.y < 0) {
-            //   console.log('Negative: ' + JSON.stringify(nb));
-        } else if(wall) {
-            //   console.log('isWall:' + JSON.stringify(nb));
-        } else if(inQueueAndHeavy(nb)) {
-            // Find nb in queue and compare weight
-          //  console.log('Heavy: ' + JSON.stringify(nb));
-        } else {
-            nb.parent = [x,y];
-            addToQ(nb);
+function find(root) {
+
+    var Q = [];
+    root.distance = 0;
+
+    Q.push(root);
+    while(Q.length > 0) {
+        var current = Q.pop();
+        if(current.xy[0] == destx && current.xy[1] == desty) {
+            console.log('Found!');
+            return Q;
         }
+        console.log('Current:' + JSON.stringify(current));
+        var neighb = [ 
+                    {xy:[current.xy[0]-1, current.xy[1]],  },
+                    {xy:[current.xy[0],   current.xy[1]+1] },
+                    {xy:[current.xy[0]+1, current.xy[1]]   },
+                    {xy:[current.xy[0],   current.xy[1]-1] }
+                    ];
 
-    }
+        for(i in neighb) {
+            var n = neighb[i];
+            var nx = n.xy[0];
+            var ny = n.xy[1];
+            //console.log(nx + ',' + ny);
+            if(nx >= 0 && ny >= 0) {             
+                if(n.distance == undefined) {
+                    n.distance = current.distance + 1;
+                    n.parent = [current.xy[0], current.xy[1]];
 
-    return false;
-}
-
-function find() {
-    var steps = 0;
-    var found = false;
-    var i = 0;
-    while(!found && steps++<500) {
-        for(i in queue) {
-            var q = queue[i];
-            found = maze(q);
-            if(found) break;
-        }
-        //display(q.x, q.y);
-    }
-
-
-
-    var path = [];
-    var parent; // = queue[queue.length -1].parent;
-    for(i in queue) {
-        var q = queue[i];
-        if(q.x == 7 && q.y==4) {
-            parent = q.parent;
-            path.push(q);
-            break;
-        }
-    }
-    var found = false;
-    var st = 100;
-    while(!found && st-->0) {
-        //console.log(parent);
-        for(i in queue) {
-            var q = queue[i];
-            if(parent != undefined && parent[0] != undefined && parent[1] && q.x == parent[0] && q.y == parent[1]) {
-               // console.log(parent + "f->" + q.parent);
-                parent = q.parent;
-                path.push(q);
+                    if(openSpace(nx, ny)) {  
+                        Q.push(n);
+                    } 
+                }
             }
         }
-        if(parent != undefined && parent.x == 0 && parent.y == 0) {
-            found = true;
-        }
+        console.log(Q);
     }
-    console.log(path);
-    return path.length;
+    console.log('Q:' + Q);
+    return steps;
 }
 
-isWall(0,1);
-isWall(1,0);
 display(10,10);
 
-console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + find());
+console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + find(start));
 
-function addToQ(c) {
-    var f = false;
-    for(var i in queue) {
-        var p = queue[i];
-        if(p.x == c.x && p.y == c.y) {
-            f = true;
-            if(c.w >= p.w) {
-                queue[i].w = c.w;
-            }
-            return;
-        }
-    }
-    if(!f) queue.push(c);
-    return;
-}
-function inQueueAndHeavy(c) {
-    for(var i in queue) {
-        var p = queue[i];
-        if(p.x == c.x && p.y == c.y && (p.w >= c.w)) {
-            return p.w;
-        }
-    }
-    return 0;
+function openSpace(x, y) {
+    var f = x*x + 3*x + 2*x*y + y + y*y;
+    f = f + parseInt(fav);
+
+    var count = krCount(f);
+    var open = (count % 2) == 0;
+    //console.log(f + ': ' + f.toString(2) + ' -> ' + count);
+   // console.log('(' + x + ',' + y + ') is ' + (!open?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
+    return open;
 }
 
 function isWall(x, y) {
@@ -138,29 +102,11 @@ function isWall(x, y) {
 }
 
 function display(a,b) {
-//    console.log(queue);
-//    console.log();
-//    console.log(a,':',b);
-//    return;
     console.log('  0123456789');
     for(var y=0;y<7;y++) {
         var row = y + ' ';
         for(var x=0;x<10;x++) {
-            // var w = 'O';
-            // for(i in queue) {
-            //     var q = queue[i];
-            //     if(x == q.x && y == q.y) {
-            //         a = q.x;
-            //         b = q.y;
-            //      //   w = q.w;
-            //         break;
-            //     }
-            // }
-            // if(x == a && y == b) {
-            //     row += w;
-            // } else {
-                row += isWall(x,y)?'#':'.';
-            // }
+            row += isWall(x,y)?'#':'.';
         }
         console.log(row);
     }
