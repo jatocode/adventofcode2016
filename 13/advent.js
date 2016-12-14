@@ -5,8 +5,8 @@
  fav = 1352;
  destx = 31;
  desty = 39;
-var sizex = 50;
-var sizey = 50;
+var sizex = 51;
+var sizey = 51;
 var maze;
 
 run();
@@ -14,13 +14,31 @@ run();
 function run() {
     var start = { xy:[1,1], parent: undefined };
     maze = matrix(sizex + 1, sizey + 1, ' ');
-    var steps = find(start);
-    displayMaze();
+//    displayMaze();
+
+    var steps = find(start, [destx, desty], 1000);
 
     console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
+
+    // Part 2
+    var count = 0;
+    for(var y=0;y<50;y++) {
+        for(var x=0;x<50;x++) {
+            if(x+y > 50) continue;
+            var st = find(start, [x,y], 1000);
+            if(st > 0 && st < 50) {
+                console.log([x,y] + ':' + st);
+                count++;
+            }
+        }
+    }
+    console.log(count);
 }
 
-function find(root) {
+function find(root, end, maxSteps) {
+
+    destx = end[0];
+    desty = end[1];
 
     var Q = [];
     var V = [];
@@ -28,14 +46,8 @@ function find(root) {
 
     Q.push(root);
     var steps = 0;
-    while(Q.length > 0 && steps++<1000) {
-       // console.log('---');
-       // console.log(Q);
+    while(Q.length > 0 && steps++<maxSteps) {
         var current = Q.shift();
-      //  console.log(Q);
-        if(current.xy[0] == 6 && current.xy[1] == 5) {
-            console.log(''); // debug
-        }
         if(current.xy[0] == destx && current.xy[1] == desty) {
             var path = [];
             maze[current.xy[0]][current.xy[1]] = 'X';
@@ -50,7 +62,6 @@ function find(root) {
         if(visited(current, V)) {
             var v = visited(current, V);
             if(v.distance > current.distance) {
-                console.log('v'+JSON.stringify(v));
                 var i = indexOf(current, V);
                 V[i].distance = current.distance;
                 V[i].parent = current.parent;
@@ -88,8 +99,8 @@ function find(root) {
             }
         }
     }
-    console.log('Not found after ' + steps);
-    return 0;
+    // console.log('Not found after ' + steps);
+    return -1;
 }
 
 function indexOf(v, V) {
@@ -161,7 +172,7 @@ function displayMaze() {
     for(var y=0;y<sizey;y++) {
         var row = y + ' ';
         for(var x=0;x<sizex;x++) {
-            //if(isWall(x,y)) maze[x][y] = '#';
+            if(isWall(x,y))  maze[x][y] = '#'; else maze[x][y]='.';
             row += maze[x][y]; 
         }
         console.log(row);
