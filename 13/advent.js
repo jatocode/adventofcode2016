@@ -20,19 +20,8 @@ function run() {
 
     console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
 
-    // Part 2
-    var count = 0;
-    for(var y=0;y<50;y++) {
-        for(var x=0;x<50;x++) {
-            if(x+y > 50) continue;
-            var st = find(start, [x,y], 1000);
-            if(st > 0 && st < 50) {
-                console.log([x,y] + ':' + st);
-                count++;
-            }
-        }
-    }
-    console.log(count);
+    console.log('In 50 steps:' + find(start, [destx, desty], 50));
+
 }
 
 function find(root, end, maxSteps) {
@@ -98,6 +87,9 @@ function find(root, end, maxSteps) {
                 //maze[nx][ny] = current.distance; 
             }
         }
+    }
+    if(steps > maxSteps) {
+        console.log('Number of visited: ' + V.length);
     }
     // console.log('Not found after ' + steps);
     return -1;
