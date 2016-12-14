@@ -1,83 +1,137 @@
-var args = process.argv.slice(2);
 
-var fav = 1352;
-var destx = 31;
-var desty = 39;
+ var fav = 10;
+ var destx = 7;
+ var desty = 4;
+ fav = 1352;
+ destx = 31;
+ desty = 39;
+var sizex = 50;
+var sizey = 50;
+var maze;
 
-if(args.length > 0) {
-    fav = parseInt(args[0]);
-    destx = parseInt(args[1]);
-    desty = parseInt(args[2]);
+run();
+
+function run() {
+    var start = { xy:[1,1], parent: undefined };
+    maze = matrix(sizex + 1, sizey + 1, ' ');
+    var steps = find(start);
+    displayMaze();
+
+    console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
 }
-
-var steps = 0;
-/*
-Breadth-First-Search(Graph, root):
-    
-    for each node n in Graph:            
-        n.distance = INFINITY        
-        n.parent = NIL
-
-    create empty queue Q      
-
-    root.distance = 0
-    Q.enqueue(root)                      
-
-    while Q is not empty:        
-        current = Q.dequeue()
-        for each node n that is adjacent to current:
-            if n.distance == INFINITY:
-                n.distance = current.distance + 1
-                n.parent = current
-                Q.enqueue(n)
-*/
-var start = { xy:[0,0], parent: undefined };
 
 function find(root) {
 
     var Q = [];
+    var V = [];
     root.distance = 0;
 
     Q.push(root);
-    while(Q.length > 0) {
-        var current = Q.pop();
-        if(current.xy[0] == destx && current.xy[1] == desty) {
-            console.log('Found!');
-            return Q;
+    var steps = 0;
+    while(Q.length > 0 && steps++<1000) {
+       // console.log('---');
+       // console.log(Q);
+        var current = Q.shift();
+      //  console.log(Q);
+        if(current.xy[0] == 6 && current.xy[1] == 5) {
+            console.log(''); // debug
         }
-        console.log('Current:' + JSON.stringify(current));
+        if(current.xy[0] == destx && current.xy[1] == desty) {
+            var path = [];
+            maze[current.xy[0]][current.xy[1]] = 'X';
+            while(current.parent != undefined) {
+                path.push(current);
+                current = visited2(current.parent, V);
+                maze[current.xy[0]][current.xy[1]] = 'O';
+            }
+            return path.length;
+        }
+
+        if(visited(current, V)) {
+            var v = visited(current, V);
+            if(v.distance > current.distance) {
+                console.log('v'+JSON.stringify(v));
+                var i = indexOf(current, V);
+                V[i].distance = current.distance;
+                V[i].parent = current.parent;
+            }
+            continue;
+        }
+        V.push(current);
         var neighb = [ 
-                    {xy:[current.xy[0]-1, current.xy[1]],  },
-                    {xy:[current.xy[0],   current.xy[1]+1] },
-                    {xy:[current.xy[0]+1, current.xy[1]]   },
-                    {xy:[current.xy[0],   current.xy[1]-1] }
-                    ];
+                      {xy:[current.xy[0],   current.xy[1]+1] },
+                      {xy:[current.xy[0],   current.xy[1]-1] },
+                      {xy:[current.xy[0]+1, current.xy[1]]   },
+                      {xy:[current.xy[0]-1, current.xy[1]],  },
+        ];
 
         for(i in neighb) {
             var n = neighb[i];
             var nx = n.xy[0];
             var ny = n.xy[1];
-            //console.log(nx + ',' + ny);
-            if(nx >= 0 && ny >= 0) {             
-                if(n.distance == undefined) {
+            if(!openSpace(nx, ny)) {
+                maze[nx][ny] = '#';
+            }
+            var q = inQueue(n, Q);
+            if(q) {
+                continue;
+            }
+            if(nx >= 0 && ny >= 0 && openSpace(nx, ny)) {             
+                maze[nx][ny] = '-';
+                //if(n.distance == undefined || n.distance > current.distance) {
+                if(n.distance == undefined ) {
                     n.distance = current.distance + 1;
-                    n.parent = [current.xy[0], current.xy[1]];
-
-                    if(openSpace(nx, ny)) {  
-                        Q.push(n);
-                    } 
+                    n.parent = {xy:[current.xy[0], current.xy[1]], distance:current.distance};
+                    Q.push(n);
                 }
+                //maze[nx][ny] = current.distance; 
             }
         }
-        console.log(Q);
     }
-    console.log('Q:' + Q);
-    return steps;
+    console.log('Not found after ' + steps);
+    return 0;
 }
 
-display(10,10);
+function indexOf(v, V) {
+    for(i in V) {
+        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
+            return i;
+        }
+    }
+    return 0;
+}
+function inQueue(v, V) {
+    for(i in V) {
+        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
+        //    if(V[i].distance > v.distance) {
+        //        V[i].distance = v.distance;
+        //        V[i].parent = v.parent;
+        //    }
+            return V[i];
+        }
+    }
+    return 0;
+}
+function visited2(v, V) {
+    var vi = [];
+    for(i in V) {
+        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
+            vi.push(V[i]);
+        }
+    }
+    if(vi.length > 1) console.log('vi');
+    if(vi.length > 0) return vi[0];
+    return 0;
+}
 
-console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + find(start));
+function visited(v, V) {
+    for(i in V) {
+        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
+            return V[i];
+        }
+    }
+    return 0;
+}
 
 function openSpace(x, y) {
     var f = x*x + 3*x + 2*x*y + y + y*y;
@@ -86,7 +140,7 @@ function openSpace(x, y) {
     var count = krCount(f);
     var open = (count % 2) == 0;
     //console.log(f + ': ' + f.toString(2) + ' -> ' + count);
-   // console.log('(' + x + ',' + y + ') is ' + (!open?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
+    // console.log('(' + x + ',' + y + ') is ' + (!open?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
     return open;
 }
 
@@ -97,15 +151,30 @@ function isWall(x, y) {
     var count = krCount(f);
     var wall = (count % 2) != 0;
     //console.log(f + ': ' + f.toString(2) + ' -> ' + count);
-   // console.log('(' + x + ',' + y + ') is ' + (wall?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
+    // console.log('(' + x + ',' + y + ') is ' + (wall?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
     return wall;
 }
 
-function display(a,b) {
-    console.log('  0123456789');
-    for(var y=0;y<7;y++) {
+function displayMaze() {
+    console.log('            1         2         3         4');
+    console.log('  01234567890123456789012345678901234567890');
+    for(var y=0;y<sizey;y++) {
         var row = y + ' ';
-        for(var x=0;x<10;x++) {
+        for(var x=0;x<sizex;x++) {
+            //if(isWall(x,y)) maze[x][y] = '#';
+            row += maze[x][y]; 
+        }
+        console.log(row);
+    }
+    console.log();
+}
+
+function display(a,b) {
+    console.log('            1         2         3         4');
+    console.log('  01234567890123456789012345678901234567890123456789');
+    for(var y=0;y<sizey;y++) {
+        var row = y + ' ';
+        for(var x=0;x<sizex;x++) {
             row += isWall(x,y)?'#':'.';
         }
         console.log(row);
@@ -118,5 +187,17 @@ function krCount(value) {
     var count;
     for (count = 0; value != 0; count++, value &= value-1);
     return count;
+}
+
+function matrix(numrows, numcols, initial) {
+    var arr = [];
+    for (var i = -numrows; i < numrows; ++i) {
+        var columns = [];
+        for (var j = -numcols; j < numcols; ++j) {
+            columns[j] = initial;
+        }
+        arr[i] = columns;
+    }
+    return arr;
 }
 
