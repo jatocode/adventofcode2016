@@ -152,15 +152,15 @@ function printSearch(x,y) {
 }
 
 function printResult(result) {
-    ctx.font = "10px Helvetica";
-    ctx.fillStyle = '#000000';
-    ctx.fillText(result, 0,200);
+    ctx.font = "30px Helvetica";
+    ctx.fillStyle = '#800000';
+    ctx.fillText(result, 0,600);
 }
 
 function print(x,y, mark) {
     // ctx.clearRect(0, 0, c.width, c.height);
     ctx.fillStyle = mark;
-    ctx.fillRect(10+x*3,10+y*3,2,2);
+    ctx.fillRect(10+x*10,10+y*10,9,9);
     ctx.stroke();
 }
 
