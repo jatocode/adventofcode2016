@@ -38,23 +38,19 @@ function find(root, end, maxSteps) {
     while(Q.length > 0 && steps++<maxSteps) {
         var current = Q.shift();
         if(current.xy[0] == destx && current.xy[1] == desty) {
+            // Found destination. Backtrace!
             var path = [];
             maze[current.xy[0]][current.xy[1]] = 'X';
             while(current.parent != undefined) {
                 path.push(current);
-                current = visited2(current.parent, V);
+                current = inQueue(current.parent, V);
                 maze[current.xy[0]][current.xy[1]] = 'O';
             }
             return path.length;
         }
 
-        if(visited(current, V)) {
-            var v = visited(current, V);
-            if(v.distance > current.distance) {
-                var i = indexOf(current, V);
-                V[i].distance = current.distance;
-                V[i].parent = current.parent;
-            }
+        if(inQueue(current, V)) {
+            // Already visited
             continue;
         }
         V.push(current);
@@ -72,19 +68,16 @@ function find(root, end, maxSteps) {
             if(!openSpace(nx, ny)) {
                 maze[nx][ny] = '#';
             }
-            var q = inQueue(n, Q);
-            if(q) {
+            if(inQueue(n, Q)) {
                 continue;
             }
             if(nx >= 0 && ny >= 0 && openSpace(nx, ny)) {             
                 maze[nx][ny] = '-';
-                //if(n.distance == undefined || n.distance > current.distance) {
                 if(n.distance == undefined ) {
                     n.distance = current.distance + 1;
                     n.parent = {xy:[current.xy[0], current.xy[1]], distance:current.distance};
                     Q.push(n);
                 }
-                //maze[nx][ny] = current.distance; 
             }
         }
     }
@@ -95,39 +88,7 @@ function find(root, end, maxSteps) {
     return -1;
 }
 
-function indexOf(v, V) {
-    for(i in V) {
-        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
-            return i;
-        }
-    }
-    return 0;
-}
 function inQueue(v, V) {
-    for(i in V) {
-        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
-        //    if(V[i].distance > v.distance) {
-        //        V[i].distance = v.distance;
-        //        V[i].parent = v.parent;
-        //    }
-            return V[i];
-        }
-    }
-    return 0;
-}
-function visited2(v, V) {
-    var vi = [];
-    for(i in V) {
-        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
-            vi.push(V[i]);
-        }
-    }
-    if(vi.length > 1) console.log('vi');
-    if(vi.length > 0) return vi[0];
-    return 0;
-}
-
-function visited(v, V) {
     for(i in V) {
         if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
             return V[i];
@@ -142,20 +103,7 @@ function openSpace(x, y) {
 
     var count = krCount(f);
     var open = (count % 2) == 0;
-    //console.log(f + ': ' + f.toString(2) + ' -> ' + count);
-    // console.log('(' + x + ',' + y + ') is ' + (!open?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
     return open;
-}
-
-function isWall(x, y) {
-    var f = x*x + 3*x + 2*x*y + y + y*y;
-    f = f + parseInt(fav);
-
-    var count = krCount(f);
-    var wall = (count % 2) != 0;
-    //console.log(f + ': ' + f.toString(2) + ' -> ' + count);
-    // console.log('(' + x + ',' + y + ') is ' + (wall?'a wall':'an open space') + ' because ' + f + ' has ' + count + ' 1:s');
-    return wall;
 }
 
 function displayMaze() {
@@ -164,7 +112,7 @@ function displayMaze() {
     for(var y=0;y<sizey;y++) {
         var row = y + ' ';
         for(var x=0;x<sizex;x++) {
-            if(isWall(x,y))  maze[x][y] = '#'; else maze[x][y]='.';
+            if(isOpenSpace(x,y))  maze[x][y] = '.'; else maze[x][y]='#';
             row += maze[x][y]; 
         }
         console.log(row);
@@ -178,7 +126,7 @@ function display(a,b) {
     for(var y=0;y<sizey;y++) {
         var row = y + ' ';
         for(var x=0;x<sizex;x++) {
-            row += isWall(x,y)?'#':'.';
+            row += isOpenSpace(x,y)?'.':'#';
         }
         console.log(row);
     }
