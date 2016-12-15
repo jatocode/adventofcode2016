@@ -5,8 +5,8 @@
  fav = 1352;
  destx = 31;
  desty = 39;
-var sizex = 51;
-var sizey = 51;
+var sizex = 50;
+var sizey = 50;
 var maze;
 
 run();
@@ -14,11 +14,10 @@ run();
 function run() {
     var start = { xy:[1,1], parent: undefined };
     maze = matrix(sizex + 1, sizey + 1, ' ');
-//    displayMaze();
 
     var steps = find(start, [destx, desty], 1000);
-
     console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
+    displayMaze();
 
     console.log('In 50 steps:' + find(start, [destx, desty], 50));
 
@@ -37,15 +36,16 @@ function find(root, end, maxSteps) {
     var steps = 0;
     while(Q.length > 0 && steps++<maxSteps) {
         var current = Q.shift();
-        if(current.xy[0] == destx && current.xy[1] == desty) {
+      if(current.xy[0] == destx && current.xy[1] == desty) {
             // Found destination. Backtrace!
             var path = [];
-            maze[current.xy[0]][current.xy[1]] = 'X';
+            printPath(root.xy[0], root.xy[1]);
             while(current.parent != undefined) {
                 path.push(current);
+                printPath(current.xy[0], current.xy[1]);
                 current = inQueue(current.parent, V);
-                maze[current.xy[0]][current.xy[1]] = 'O';
             }
+            printDestination(destx, desty);
             return path.length;
         }
 
@@ -66,13 +66,13 @@ function find(root, end, maxSteps) {
             var nx = n.xy[0];
             var ny = n.xy[1];
             if(!openSpace(nx, ny)) {
-                maze[nx][ny] = '#';
+                printWall(nx, ny);
             }
             if(inQueue(n, Q)) {
                 continue;
             }
             if(nx >= 0 && ny >= 0 && openSpace(nx, ny)) {             
-                maze[nx][ny] = '-';
+                printChecked(nx, ny);
                 if(n.distance == undefined ) {
                     n.distance = current.distance + 1;
                     n.parent = {xy:[current.xy[0], current.xy[1]], distance:current.distance};
@@ -106,14 +106,41 @@ function openSpace(x, y) {
     return open;
 }
 
+function printPath(x,y) {
+    print(x,y, 'O');  
+}
+
+function printChecked(x,y) {
+    print(x,y, '-');  
+}
+
+function printWall(x,y) {
+    print(x,y, '#');  
+}
+
+function printOpen(x,y) {
+    print(x,y, '.');  
+}
+
+function printDestination(x,y) {
+    print(x,y, 'X');
+}
+
+function print(x,y, mark) {
+    maze[x][y] = mark;   
+}
+
 function displayMaze() {
     console.log('            1         2         3         4');
     console.log('  01234567890123456789012345678901234567890');
     for(var y=0;y<sizey;y++) {
         var row = y + ' ';
         for(var x=0;x<sizex;x++) {
-            if(isOpenSpace(x,y))  maze[x][y] = '.'; else maze[x][y]='#';
+            if(maze[x][y] == ' ') {
+              //  if(openSpace(x,y)) printOpen(x,y); else printWall(x,y);
+            } 
             row += maze[x][y]; 
+            
         }
         console.log(row);
     }
@@ -126,7 +153,7 @@ function display(a,b) {
     for(var y=0;y<sizey;y++) {
         var row = y + ' ';
         for(var x=0;x<sizex;x++) {
-            row += isOpenSpace(x,y)?'.':'#';
+            row += openSpace(x,y)?'.':'#';
         }
         console.log(row);
     }
