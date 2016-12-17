@@ -1,7 +1,12 @@
 var fav = 10;
 var destx = 7;
 var desty = 4;
-fav = 1352;
+var param = location.search.split('fav=')[1]
+if(param == undefined) {
+    fav = 1352;
+} else {
+    fav = param;
+}
 destx = 31;
 desty = 39;
 var sizex = 50;
@@ -22,7 +27,7 @@ function run() {
     var start = { xy:[1,1], parent: undefined };
     maze = matrix(sizex + 1, sizey + 1, 0);
 
-    var steps = breadthFirst(start, [destx, desty], 1000);
+    var steps = breadthFirst(start, [destx, desty], 5000);
     console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
     //displayMaze();
 
