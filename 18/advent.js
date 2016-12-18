@@ -16,8 +16,14 @@ for(i in startrow.split('')) {
 
 for(var room=0; room < rooms; room++ ) {
     for(r in rows[room]) {
-        var tile = rows[room][r];
-        safe += tile;
+        var tile;
+        if(room == 0) {
+            tile = rows[room][r];
+            safe += tile;
+        } else {
+            // LOGIC
+
+        }
     }
 }
 
