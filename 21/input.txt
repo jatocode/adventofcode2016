@@ -1,4 +1,4 @@
-wap position 5 with position 6
+swap position 5 with position 6
 reverse positions 1 through 6
 rotate right 7 steps
 rotate based on position of letter c
