@@ -21,7 +21,7 @@ read(args[0], function(data) {
     for(l in lines) {
         var line = lines[l];
 
-        var l = scrambled.length;
+        var len = scrambled.length;
         var match = line.match(/swap position (\d+) with position (\d+)/);
         if(match) swapPos(match[1], match[2]);
 
@@ -40,17 +40,52 @@ read(args[0], function(data) {
         match = line.match(/move position (\d+) to position (\d+)/);
         if(match) movePos(match[1], match[2]);
         
-        console.log(scrambled);
-        if(scrambled.length != l) {
+//        console.log(scrambled);
+        if(scrambled.length != len) {
             console.log('Error!');
             break;
         }
     }
     console.log('Final scrambled: ' + scrambled);
+
+    // Part 2. Bang bang flip it and reverse it
+//    scrambled = 'fbgdceah';
+    for(var l=lines.length-1; l >= 0; l--) {
+        var line = lines[l];
+
+        var len = scrambled.length;
+        var match = line.match(/swap position (\d+) with position (\d+)/);
+        if(match) swapPos(match[2], match[1]);
+
+        match = line.match(/swap letter (.) with letter (.)/);
+        if(match) swapLetter(match[1], match[2]);
+
+        match = line.match(/rotate (left|right) (\d+) .*/);
+        if(match) {
+            var dir = match[1]=='left'?'right':'left';
+            rotateSteps(match[1], match[2]);
+        }
+
+        match = line.match(/rotate based on position of letter (.)/);
+        if(match) rotateLetterReverse(match[1]);
+
+        match = line.match(/reverse positions (\d+) through (\d+)/);
+        if(match) reversePos(match[1], match[2]);
+
+        match = line.match(/move position (\d+) to position (\d+)/);
+        if(match) movePos(match[2], match[1]);
+        
+//        console.log(scrambled);
+        if(scrambled.length != len) {
+            console.log('Error!');
+            break;
+        }
+    }
+    console.log('Part 2. Unscrambled: ' + scrambled);
+
 });
 
 function swapPos(a, b) {
-    console.log('swap position ' + a + ' ' + b);
     var ac = scrambled[a];
     var bc = scrambled[b];
 
@@ -59,7 +94,6 @@ function swapPos(a, b) {
 }
 
 function swapLetter(a, b) {
-    console.log('swap letter ' + a + ' ' + b);
     var regex = new RegExp(a, "g");
     scrambled = scrambled.replace(regex, '#');
     regex = new RegExp(b, "g");
@@ -69,7 +103,6 @@ function swapLetter(a, b) {
 }
 
 function rotateSteps(a, b) {
-    console.log('rotateSteps ' + a + ' ' + b);
     if(a == 'left') {
        scrambled = scrambled.slice(b) + scrambled.slice(0, b);
     }
@@ -78,8 +111,15 @@ function rotateSteps(a, b) {
     }
 }
 
+function rotateLetterReverse(a) {
+    var steps = scrambled.indexOf(a);
+    if(steps >= 4) {
+        steps += 1;
+    }
+    steps += 1;
+    rotateSteps('left', steps % scrambled.length);
+}
 function rotateLetter(a) {
-    console.log('rotateLetter ' + a );
     var steps = scrambled.indexOf(a);
     if(steps >= 4) {
         steps += 1;
@@ -91,7 +131,6 @@ function rotateLetter(a) {
 function reversePos(a, b) {
     a = parseInt(a);
     b = parseInt(b);
-    console.log('reversePos ' + a + ' ' + b);
     var x = scrambled.slice( 0, a );
     var y = scrambled.slice( a , b +1  ).split('').reverse().join('');
     var z = scrambled.slice( b + 1 );
@@ -99,9 +138,7 @@ function reversePos(a, b) {
 }
 
 function movePos(a, b) {
-    console.log('movePos ' + a + ' ' + b);
     var temp = scrambled.slice(0,a) + scrambled.slice(parseInt(a)+1);
-    //console.log(temp);
     if(b != 0) {
         scrambled = temp.substr(0, b) + scrambled[a] + temp.substr(parseInt(b));
     } else {
