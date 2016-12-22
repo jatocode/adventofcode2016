@@ -11,9 +11,46 @@ function read(file, callback) {
 }
 
 var plain = 'abcdefgh';
-plain = 'abcde';
+//plain = 'abcde';
 
 var scrambled = plain;
+// console.log('Plain: ' + plain);
+// rotateLetter('a');
+// scrambled = plain;
+// rotateLetter('b');
+// scrambled = plain;
+// rotateLetter('c');
+// scrambled = plain;
+// rotateLetter('d');
+// scrambled = plain;
+// rotateLetter('e');
+// scrambled = plain;
+// rotateLetter('f');
+// scrambled = plain;
+// rotateLetter('g');
+// scrambled = plain;
+// rotateLetter('h');
+// console.log();
+
+// scrambled = 'abcdefg';
+// rotateLetterReverse('a');
+// scrambled = 'ghabcdef';
+// rotateLetterReverse('b');
+// scrambled = plain;
+// rotateLetterReverse('c');
+// scrambled = plain;
+// rotateLetterReverse('d');
+// scrambled = plain;
+// rotateLetterReverse('e');
+// scrambled = plain;
+// rotateLetterReverse('f');
+// scrambled = plain;
+// rotateLetterReverse('g');
+// scrambled = plain;
+// rotateLetterReverse('h');
+// return;
+
+var debug = [];
 
 read(args[0], function(data) {
     var lines = data.split("\n");
@@ -23,7 +60,8 @@ read(args[0], function(data) {
 
         var len = scrambled.length;
         var match = line.match(/swap position (\d+) with position (\d+)/);
-        console.log(scrambled + ' <- ' + line);
+        console.log(l + ' ' + scrambled + ' <- ' + line);
+        debug.push(scrambled);
         if(match) swapPos(match[1], match[2]);
 
         match = line.match(/swap letter (.) with letter (.)/);
@@ -51,13 +89,13 @@ read(args[0], function(data) {
     console.log('  -----  ');
 
     // Part 2. Bang bang flip it and reverse it
-//    scrambled = 'fbgdceah';
+    scrambled = 'fbgdceah';
     for(var l=lines.length-1; l >= 0; l--) {
         var line = lines[l];
 
         var len = scrambled.length;
         var match = line.match(/swap position (\d+) with position (\d+)/);
-        console.log(scrambled + ' <- ' + line);
+        console.log(l + ' ' + scrambled + ' <- ' + line);
 
         if(match) swapPos(match[2], match[1]);
 
@@ -77,8 +115,13 @@ read(args[0], function(data) {
         if(match) reversePos(match[1], match[2]);
 
         match = line.match(/move position (\d+) to position (\d+)/);
-        if(match) movePos(match[2], match[0]);
+        if(match) movePos(match[2], match[1]);
         
+        // if(scrambled != debug[l]) {
+        //     console.log(scrambled + ' != ' + debug[l]);
+        //     console.log('Error!');
+        //     break;
+        // }
         if(scrambled.length != len) {
             console.log('Error!');
             break;
@@ -116,13 +159,32 @@ function rotateSteps(a, b) {
 }
 
 function rotateLetterReverse(a) {
-    var steps = scrambled.indexOf(a);
-    steps += 1;
-    if(steps > 3) {
-        steps -= 2;
-    } 
-    rotateSteps('left', steps % scrambled.length);
+
+    /*
+
+
+           0 1 2 3 4 5 6 7
+    shifts 1 2 3 4 6 7 8 9
+    modulo 1 3 5 7 2 4 6 0
+
+*/
+
+    var pos = scrambled.indexOf(a);
+    var steps;
+    if (pos == 0) {
+      steps = 9;
+    } else if (pos % 2 == 0) {
+      steps = 5 + pos / 2;
+    } else {
+      steps = (pos + 1) / 2;
+    }
+
+    console.log(steps);
+    rotateSteps('left', steps);  
+
+    console.log(scrambled);
 }
+
 function rotateLetter(a) {
     var steps = scrambled.indexOf(a);
     if(steps >= 4) {
@@ -130,7 +192,10 @@ function rotateLetter(a) {
     }
     steps += 1;
     rotateSteps('right', steps % scrambled.length);
+    console.log(scrambled);
+
 }
+
 
 function reversePos(a, b) {
     a = parseInt(a);
