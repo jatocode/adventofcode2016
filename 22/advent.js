@@ -10,9 +10,9 @@ function read(file, callback) {
     });
 }
 
+var nodes = [];
 read(args[0], function(data) {
     var lines = data.split("\n");
-    var nodes = [];
     for(l in lines) {
         var line = lines[l];
         var regex = /node-x(\d+)-y(\d+)\s+(\d+)T\s+(\d+)T\s+(\d+)T\s+(\d+)/;
@@ -28,5 +28,26 @@ read(args[0], function(data) {
             nodes.push(node);
         }
     }
-    console.log(nodes);
+    console.log(getNode(1,1));
+
+    // Build tree with searchfunction of neigbours?
+
 });
+
+function getNode(x,y) {
+    for(i in nodes) {
+        if(nodes[i].x == x && nodes[i].y == y) {
+            return nodes[i];
+        }
+    }
+}
+    
+function viablePair(nodea, nodeb) {
+    if(nodea.avail == 0) {
+        return false;
+    }
+
+    if(nodea.used < nodeb.avail) {
+        return true;
+    }
+}
