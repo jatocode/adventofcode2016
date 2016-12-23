@@ -30,7 +30,6 @@ read(args[0], function(data) {
 	}
 	var i=0;
 
-console.log(instructions);
 	while(i < instructions.length) {
 		var inst = instructions[i];
 //	    console.log(i + ' : ' + inst.type + ':' + inst.data + ' a=' + regs['a'] + ' b=' + regs['b'] + ' c=' + regs['c'] + ' d=' + regs['d']);
@@ -91,7 +90,6 @@ console.log(instructions);
 						break;
 					}
 				}
-				console.log(instructions);
 				i++;
 				break;
             default:
