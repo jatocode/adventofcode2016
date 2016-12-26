@@ -33,8 +33,17 @@ read(args[0], function(data) {
 	while(i < instructions.length) {
 		var inst = instructions[i];
 //	    console.log(i + ' : ' + inst.type + ':' + inst.data + ' a=' + regs['a'] + ' b=' + regs['b'] + ' c=' + regs['c'] + ' d=' + regs['d']);
-
+// 479011005
 		switch(inst.type) {
+			case 'nop':
+				i++;
+				break;
+			case 'mul':
+				var f1 = registerOrData(inst.data[0]);
+				var f2 = registerOrData(inst.data[1]);
+				regs[inst.data[2]] = f1 * f2;
+				i++;
+				break;
             case 'cpy':
 				if(inst.data[1].match(/[a-d]+/)) {
 					regs[inst.data[1]] = registerOrData(inst.data[0]);
@@ -94,6 +103,7 @@ read(args[0], function(data) {
 				break;
             default:
                 console.log('Monorail failure');
+                console.log(inst);
                 break;
         }
 	}
