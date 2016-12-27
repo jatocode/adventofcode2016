@@ -6,8 +6,8 @@ mul b d a
 nop a
 nop c
 nop c -2
-nop d
-nop d -5
+cpy 0 d
+cpy 0 c
 dec b
 cpy b c
 cpy c d

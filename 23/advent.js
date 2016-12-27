@@ -41,7 +41,9 @@ read(args[0], function(data) {
 			case 'mul':
 				var f1 = registerOrData(inst.data[0]);
 				var f2 = registerOrData(inst.data[1]);
-				regs[inst.data[2]] = f1 * f2;
+				//console.log('mul ' + f1 + f2 + inst[data[2]]);
+				//regs[inst.data[2]] = f1 * f2;
+				regs['a'] = f1 * f2; // hardcoded to a
 				i++;
 				break;
             case 'cpy':
