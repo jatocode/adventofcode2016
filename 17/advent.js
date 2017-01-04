@@ -19,10 +19,10 @@ var expected = ['DDRRRD', 'DDUDRLRRUDRD', 'DRURDRUDDLLDLUURRDULRLDUUDDDRR', ''];
 for(var p in passcodes) {
 	var passcode = passcodes[p];
 
-	var result = breadthFirst({xy:[0,0]}, [3,3]);
+	var result = breadthFirst(Node(0,0), Node(3,3));
 	console.log('The path to the vault with start ' + passcode + ' is : ' +  result.min + ' and longest path: ' + result.max.length);
 	if(expected[p] != '' && expected[p] != result.min) {
-		console.log('Expected ' + expected[p] + ' got ' + result);
+		console.log('Expected ' + expected[p] + ' got ' + result.min);
 	}
 	console.log();
 }
@@ -52,11 +52,7 @@ function openPath(x, y, path, lastStep) {
 }
 
 function breadthFirst(root, end) {
-	var current = [0,0];
 	var reached = {min:'', max:''};
-
-	destx = end[0];
-	desty = end[1];
 
 	var Q = [];
 	var V = [];
@@ -67,8 +63,7 @@ function breadthFirst(root, end) {
 	var steps = 0;
 	while(Q.length > 0 ) {
 		var current = Q.shift();
-
-		if(current.xy[0] == destx && current.xy[1] == desty) {
+		if(current.x() == end.x() && current.y() == end.y()) {
 			if(reached.min == '') {
 				reached.min = current.path;
 			} 
@@ -79,25 +74,20 @@ function breadthFirst(root, end) {
 			continue;
 		}
 
-		var neighb = [ 
-			{xy:[current.xy[0],   current.xy[1]+1], lastStep: 'D' },
-			{xy:[current.xy[0],   current.xy[1]-1], lastStep: 'U' },
-			{xy:[current.xy[0]+1, current.xy[1]],   lastStep: 'R' },
-			{xy:[current.xy[0]-1, current.xy[1]],   lastStep: 'L' },
-		];
+		var neighb = neighb4(current);
 
 		for(i in neighb) {
 			var n = neighb[i];
-			var nx = n.xy[0];
-			var ny = n.xy[1];
+			var nx = n.x();
+			var ny = n.y();
 
-			if(inQueue(n, V)) {
+			if(findNode(n, V)) {
 				continue;
 			}
 			if(nx >= 0 && ny >= 0 && openPath(nx, ny, current.path, n.lastStep)) {             
 				if(n.distance == undefined ) {
 					n.distance = current.distance + 1;
-					n.parent = {xy:[current.xy[0], current.xy[1]], distance:current.distance};
+					n.parent = current;
 					n.path = current.path + n.lastStep;
 					Q.push(n);
 				}
@@ -106,6 +96,34 @@ function breadthFirst(root, end) {
 	}
 
 	return reached;
+}
+
+
+function findNode(v, V) {
+    for(i in V) {
+        if( V[i].x() == v.x() && V[i].y() == v.y() && V[i].path == v.path) {
+            return V[i];
+        }
+    }
+    return 0;
+}
+
+function neighb4(node) {
+    return [Node(node.x(),     node.y() + 1, 'D' ), 
+   			Node(node.x(),     node.y() - 1, 'U' ),
+    		Node(node.x() + 1, node.y(), 'R' ),
+    		Node(node.x() - 1, node.y(), 'L' ) ];
+}
+
+function Node(x, y, lastStep) {
+    var n = { xy: [x,y],
+        distance: undefined, 
+        lastStep: lastStep,
+        path: '',
+        x: function() { return this.xy[0]; },
+        y: function() { return this.xy[1]; },
+    };
+    return n;
 }
 
 function inQueue(v, V) {
