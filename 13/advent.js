@@ -16,6 +16,9 @@ var maze;
 var Q = [];
 var V = [];
 
+var closedSet = [];
+var open = [];
+
 var steps;
 
 var c = document.getElementById('advent-canvas');
@@ -27,12 +30,28 @@ function run() {
     var start = Node(1,1);
     maze = matrix(sizex + 1, sizey + 1, 0);
 
-    var steps = breadthFirst(start, Node(destx, desty) );
+    //var steps = breadthFirst(start, Node(destx, desty) );
     console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
     //displayMaze();
+    var steps = astar(start, Node(destx, desty), openSpace, manhattan );
 
     //console.log('In 50 steps:' + breadthFirst(start, [destx, desty], 50));
 
+}
+
+function astar(start, end, possiblePath, heuristic) {
+
+    destx = end.x();
+    desty = end.y();
+
+    start.g = 0;
+    start.f = heuristic(start, end);
+    open.push(start);
+
+    displayMaze();
+    steps = searchLoopAstar(start, end, possiblePath, heuristic);
+
+    return steps;
 }
 
 function breadthFirst(root, end) {
@@ -54,9 +73,9 @@ function breadthFirst(root, end) {
 function searchLoopBF(root) {
     var path = [];
     if(Q.length > 0) {
-      var current = Q.shift();
+      	var current = Q.shift();
 
-      if(current.x() == destx && current.y() == desty) {
+      	if(current.x() == destx && current.y() == desty) {
             // Found destination. Backtrace!
             printPath(root.x(), root.y());
             while(current.parent != undefined) {
@@ -67,7 +86,7 @@ function searchLoopBF(root) {
             printDestination(destx, desty);
             printResult('Number of steps: ' + path.length);
             return path.length;
-        }
+       	}
 
         if(!findNode(current, V)) {       
             V.push(current);
@@ -104,6 +123,61 @@ function searchLoopBF(root) {
     return path.length;
 }
 
+// A* by Tobias
+function searchLoopAstar(start, end, possiblePath, heuristic) {
+    var steps = 0;
+    if(open.length > 0) {
+        steps++;
+        current = lowestF(open);
+        if(current.x() == end.x() && current.y() == end.y()) {
+            var path = [];
+            printPath(start.x(), start.y());
+            while(current.parent != undefined) {
+                path.push(current);
+                printPath(current.x(), current.y());
+                current = findNode(current.parent, closedSet);
+
+            }
+            printDestination(destx, desty);
+            printResult('Number of steps: ' + path.length);
+
+            console.log('Found in ' + steps + ' steps');
+            return path;
+        }
+
+        closedSet.push(current);
+        var neighb = neighb4(current);
+        for(i in neighb) {
+            var n = neighb[i];
+            if(findNode(n, closedSet)) {
+                continue;
+            }
+            if(!possiblePath(n.x(), n.y()) ) {             
+                closedSet.push(n);
+                continue;
+            }
+
+            printSearch(current.x(), current.y());
+
+            var tg = current.g + heuristic(current, n);
+            if(!findNode(n, open)) {
+                open.push(n);
+            } else if(tg >= n.g) {
+                continue; // Worse path
+            }
+
+            n.parent = current;
+            n.g = tg;
+            n.f = n.g + heuristic(n, end);
+        }
+         setTimeout(function() { 
+            searchLoopAstar(start, end, possiblePath, heuristic);
+        }, 2);
+    }
+    return -1;
+}
+
+
 function openSpace(x, y) {
     var f = x*x + 3*x + 2*x*y + y + y*y;
     f = f + parseInt(fav);
@@ -138,6 +212,24 @@ function Node(x, y) {
         y: function() { return this.xy[1]; },
     };
     return n;
+}
+
+function lowestF(open) {
+    var fmin = Number.MAX_SAFE_INTEGER;
+    var min = 0;
+    for(i in open) {
+        if(open[i].f < fmin) {
+            fmin = open[i].f;
+            min = i;
+        }
+    }
+    var el = open[min];
+    open.splice(min,1);
+    return el;
+}
+
+function manhattan(from, to) {
+    return (Math.abs(to.x() - from.x()) + Math.abs(to.y() - from.y()));
 }
 
 function printPath(x,y) {
