@@ -101,7 +101,7 @@ function astar(start, end, possiblePath, heuristic) {
 }
 
 function lowestF(open) {
-    var fmin = 2^32;
+    var fmin = Number.MAX_SAFE_INTEGER;
     var min = 0;
     for(i in open) {
         if(open[i].f < fmin) {
@@ -221,8 +221,8 @@ function neighb4(node) {
 function Node(x, y) {
     var n = { xy: [x,y],
         distance: undefined, 
-        g: 2^32, 
-        f: 2^32,
+        g: Number.MAX_SAFE_INTEGER, 
+        f: Number.MAX_SAFE_INTEGER,
         x: function() { return this.xy[0]; },
         y: function() { return this.xy[1]; },
     };
