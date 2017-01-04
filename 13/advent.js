@@ -31,7 +31,7 @@ function run() {
     maze = matrix(sizex + 1, sizey + 1, 0);
 
     //var steps = breadthFirst(start, Node(destx, desty) );
-    console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
+    //console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
     //displayMaze();
     var steps = astar(start, Node(destx, desty), openSpace, manhattan );
 
@@ -72,9 +72,12 @@ function breadthFirst(root, end) {
 
 function searchLoopBF(root) {
     var path = [];
-    if(Q.length > 0) {
+    if(Q.length > 0 ) {
       	var current = Q.shift();
-
+      	if(current.distance > 50) {
+      		console.log(V.length);
+      		return;
+      	}
       	if(current.x() == destx && current.y() == desty) {
             // Found destination. Backtrace!
             printPath(root.x(), root.y());
