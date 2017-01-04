@@ -13,15 +13,15 @@
 */
 var md5hex = require('md5-hex');
 
-var passcodes = ['hijkl', 'ihgpwlah', 'kglvqrro', 'ulqzkmiv', 'qzthpkfp'];
-var expected = ['', 'DDRRRD', 'DDUDRLRRUDRD', 'DRURDRUDDLLDLUURRDULRLDUUDDDRR', ''];
+var passcodes = ['ihgpwlah', 'kglvqrro', 'ulqzkmiv', 'qzthpkfp'];
+var expected = ['DDRRRD', 'DDUDRLRRUDRD', 'DRURDRUDDLLDLUURRDULRLDUUDDDRR', ''];
 
 for(var p in passcodes) {
 	var passcode = passcodes[p];
 
-	var result = breadthFirst({xy:[0,0]}, [3,3], 5000);
-	console.log('The path to the vault with start ' + passcode + ' is : ' +  result);
-	if(expected[p] != '' && expected[p] != result) {
+	var result = breadthFirst({xy:[0,0]}, [3,3]);
+	console.log('The path to the vault with start ' + passcode + ' is : ' +  result.min + ' and longest path: ' + result.max.length);
+	if(expected[p] != '' && expected[p] != result.min) {
 		console.log('Expected ' + expected[p] + ' got ' + result);
 	}
 	console.log();
@@ -53,7 +53,7 @@ function openPath(x, y, path, lastStep) {
 
 function breadthFirst(root, end) {
 	var current = [0,0];
-	var reached = [];
+	var reached = {min:'', max:''};
 
 	destx = end[0];
 	desty = end[1];
@@ -69,8 +69,14 @@ function breadthFirst(root, end) {
 		var current = Q.shift();
 
 		if(current.xy[0] == destx && current.xy[1] == desty) {
-			reached.push(current);
-			return reached[0].path;
+			if(reached.min == '') {
+				reached.min = current.path;
+			} 
+			if(current.path.length > reached.max.length) {
+				reached.max = current.path;
+			}
+			V.push(current);
+			continue;
 		}
 
 		var neighb = [ 
@@ -89,7 +95,6 @@ function breadthFirst(root, end) {
 				continue;
 			}
 			if(nx >= 0 && ny >= 0 && openPath(nx, ny, current.path, n.lastStep)) {             
-				//printChecked(nx, ny);
 				if(n.distance == undefined ) {
 					n.distance = current.distance + 1;
 					n.parent = {xy:[current.xy[0], current.xy[1]], distance:current.distance};
@@ -100,14 +105,7 @@ function breadthFirst(root, end) {
 		}
 	}
 
-	reached.sort(function(a,b) {
-		return a.length - b.length;
-	});
-
-	if(reached.length > 0) {
-		return reached[0].path;
-	}
-	return [];
+	return reached;
 }
 
 function inQueue(v, V) {
