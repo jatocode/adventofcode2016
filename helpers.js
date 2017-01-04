@@ -27,9 +27,15 @@ path = astar(start, end, pathCheckTest, manhattan);
 if(path.length < 0) {
     console.log('Path finder failed');
 }
-prettypath = prettyPrintPath(path);
-console.log(prettypath);
 console.log('Path length: ' + path.length);
+
+// DFS
+path = depthfirst(start, end, pathCheckTest);
+if(path.length < 0) {
+    console.log('Path finder failed');
+}
+console.log('Path length: ' + path.length);
+console.log(prettyPrintPath(path));
 
 // A* by Tobias
 function astar(start, end, possiblePath, heuristic) {
@@ -42,7 +48,9 @@ function astar(start, end, possiblePath, heuristic) {
     start.f = heuristic(start, end);
     open.push(start);
 
+    var steps = 0;
     while(open.length > 0) {
+        steps++;
         current = lowestF(open);
         if(current.x() == end.x() && current.y() == end.y()) {
             var path = [];
@@ -50,6 +58,7 @@ function astar(start, end, possiblePath, heuristic) {
                 path.push(current);
                 current = inQueue(current.parent, closed);
             }
+            console.log('Found in ' + steps + ' steps');
             return path;
         }
 
@@ -109,7 +118,9 @@ function breadthfirst(root, end, possiblePath) {
     root.distance = 0;
     Q.push(root);
 
+    var steps = 0;
     while(Q.length > 0) {
+        steps++;
         var current = Q.shift();
         if(current.x() == end.x() && current.y() == end.y()) {
             var path = [];
@@ -117,6 +128,7 @@ function breadthfirst(root, end, possiblePath) {
                 path.push(current);
                 current = inQueue(current.parent, V);
             }
+            console.log('Found in ' + steps + ' steps');
             return path;
         }
 
@@ -141,6 +153,41 @@ function breadthfirst(root, end, possiblePath) {
         }
     }
 
+    return -1;
+}
+
+// Depth first
+function depthfirst(start, end, possiblePath) {
+    var S = [];
+    var V = [];
+    console.log('DepthFS, looking for path from ' + start.xy + ' to ' + end.xy);
+    S.push(start);
+    var steps = 0;
+    while(S.length > 0) {
+        steps++;
+        var current = S.pop();
+        if(current.x() == end.x() && current.y() == end.y()) {
+            var path = [];
+            while(current.parent != undefined) {
+                path.push(current);
+                current = inQueue(current.parent, V);
+            }
+            console.log('Found in ' + steps + ' steps');
+            return path;
+        }
+
+        if(!inQueue(current, V)) {
+            V.push(current);
+            var neighb = neighb4(current);
+            for(i in neighb) {
+                var n = neighb[i];
+                if( possiblePath(n.x(), n.y())) {
+                    S.push(n);
+                    n.parent = current;
+                }
+            }
+        }
+    }
     return -1;
 }
 
@@ -202,11 +249,12 @@ function pathCheckTest(x, y) {
     } 
     return true;
 }
-
+    
 function printTestArray() {
     console.log('  0123456789');
     for(y in testArray) {
         console.log(y + ' ' + testArray[y]);
     }
+    console.log();
 }
 
