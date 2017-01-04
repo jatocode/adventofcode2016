@@ -51,7 +51,7 @@ function openPath(x, y, path, lastStep) {
 	return open;
 }
 
-function breadthFirst(root, end, maxSteps) {
+function breadthFirst(root, end) {
 	var current = [0,0];
 	var reached = [];
 
@@ -65,11 +65,12 @@ function breadthFirst(root, end, maxSteps) {
 
 	Q.push(root);
 	var steps = 0;
-	while(Q.length > 0 && steps++<maxSteps) {
+	while(Q.length > 0 ) {
 		var current = Q.shift();
 
 		if(current.xy[0] == destx && current.xy[1] == desty) {
 			reached.push(current);
+			return reached[0].path;
 		}
 
 		var neighb = [ 
@@ -84,7 +85,7 @@ function breadthFirst(root, end, maxSteps) {
 			var nx = n.xy[0];
 			var ny = n.xy[1];
 
-			if(inQueue(n, Q)) {
+			if(inQueue(n, V)) {
 				continue;
 			}
 			if(nx >= 0 && ny >= 0 && openPath(nx, ny, current.path, n.lastStep)) {             
