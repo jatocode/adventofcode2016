@@ -12,16 +12,92 @@ var testArray = [
 ];
 
 var shortestPath = [ [ 7, 4 ], [ 6, 4 ], [ 6, 5 ], [ 5, 5 ], [ 4, 5 ], [ 4, 4 ], [ 3, 4 ], [ 3, 3 ], [ 3, 2 ], [ 2, 2 ], [ 1, 2 ] ];
+printTestArray();
 
+// BFS
 var path = breadthfirst(start, end, pathCheckTest);
 if(path.length < 0) {
     console.log('Path finder failed');
 }
 var prettypath = prettyPrintPath(path);
-if(comparePath(path, prettypath)) {
-    console.log('Not shortest path');
-}
 console.log('Path length: ' + path.length);
+
+// A*
+path = astar(start, end, pathCheckTest, manhattan);
+if(path.length < 0) {
+    console.log('Path finder failed');
+}
+prettypath = prettyPrintPath(path);
+console.log(prettypath);
+console.log('Path length: ' + path.length);
+
+// A* by Tobias
+function astar(start, end, possiblePath, heuristic) {
+    var closed = [];
+    var open = [];
+
+    console.log('A*, looking for path from ' + start.xy + ' to ' + end.xy);
+
+    start.g = 0;
+    start.f = heuristic(start, end);
+    open.push(start);
+
+    while(open.length > 0) {
+        current = lowestF(open);
+        if(current.x() == end.x() && current.y() == end.y()) {
+            var path = [];
+            while(current.parent != undefined) {
+                path.push(current);
+                current = inQueue(current.parent, closed);
+            }
+            return path;
+        }
+
+        closed.push(current);
+        var neighb = neighb4(current);
+        for(i in neighb) {
+            var n = neighb[i];
+            if(inQueue(n, closed)) {
+                continue;
+            }
+            if(!possiblePath(n.x(), n.y()) ) {             
+                closed.push(n);
+                continue;
+            }
+
+            var tg = current.g + heuristic(current, n);
+            if(!inQueue(n, open)) {
+                open.push(n);
+            } else if(tg >= n.g) {
+                continue; // Worse path
+            }
+
+            n.parent = current;
+            n.g = tg;
+            n.f = n.g + heuristic(n, end);
+        }
+    }
+
+}
+
+function lowestF(open) {
+    var fmin = 2^32;
+    var min = 0;
+    for(i in open) {
+        if(open[i].f < fmin) {
+            fmin = open[i].f;
+            min = i;
+        }
+    }
+    var el = open[min];
+    open.splice(min,1);
+    return el;
+}
+
+function manhattan(from, to) {
+    return (Math.abs(from.x() - to.x()) + Math.abs(from.y() - to.y()));
+}
+
 
 // Breadth First
 function breadthfirst(root, end, possiblePath) {
@@ -79,19 +155,19 @@ function inQueue(v, V) {
 
 function neighb4(node) {
     return [Node(node.x(),     node.y() + 1 ), 
-            Node(node.x(),     node.y() - 1 ),
-            Node(node.x() + 1, node.y() ),
-            Node(node.x() - 1, node.y() ) ];
+    Node(node.x(),     node.y() - 1 ),
+    Node(node.x() + 1, node.y() ),
+    Node(node.x() - 1, node.y() ) ];
 }
 
 function Node(x, y) {
     var n = { xy: [x,y],
-              distance: undefined, 
-              g: undefined, 
-              f: undefined,
-              x: function() { return this.xy[0]; },
-              y: function() { return this.xy[1]; },
-            };
+        distance: undefined, 
+        g: 2^32, 
+        f: 2^32,
+        x: function() { return this.xy[0]; },
+        y: function() { return this.xy[1]; },
+    };
     return n;
 }
 
@@ -125,5 +201,12 @@ function pathCheckTest(x, y) {
         return false;
     } 
     return true;
+}
+
+function printTestArray() {
+    console.log('  0123456789');
+    for(y in testArray) {
+        console.log(y + ' ' + testArray[y]);
+    }
 }
 
