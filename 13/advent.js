@@ -24,10 +24,10 @@ var ctx=c.getContext("2d");
 run();
 
 function run() {
-    var start = { xy:[1,1], parent: undefined };
+    var start = Node(1,1);
     maze = matrix(sizex + 1, sizey + 1, 0);
 
-    var steps = breadthFirst(start, [destx, desty], 5000);
+    var steps = breadthFirst(start, Node(destx, desty) );
     console.log('Steps needed to reach (' + destx + ',' + desty + ') with fav ' + fav +' : ' + steps);
     //displayMaze();
 
@@ -35,10 +35,10 @@ function run() {
 
 }
 
-function breadthFirst(root, end, maxSteps) {
+function breadthFirst(root, end) {
 
-    destx = end[0];
-    desty = end[1];
+    destx = end.x();
+    desty = end.y();
 
     root.distance = 0;
 
@@ -46,61 +46,51 @@ function breadthFirst(root, end, maxSteps) {
     steps = 0;
 
     displayMaze();
-    steps = searchLoop(root, maxSteps);
+    steps = searchLoopBF(root);
 
-    if(steps > maxSteps) {
-        console.log('Number of visited: ' + V.length);
-    }
-    // console.log('Not found after ' + steps);
     return steps;
 }
 
-function searchLoop(root, maxSteps) {
+function searchLoopBF(root) {
     var path = [];
-    if(Q.length > 0 && steps++<maxSteps) {
+    if(Q.length > 0) {
       var current = Q.shift();
- //     displayMaze();
 
-      if(current.xy[0] == destx && current.xy[1] == desty) {
+      if(current.x() == destx && current.y() == desty) {
             // Found destination. Backtrace!
-            printPath(root.xy[0], root.xy[1]);
+            printPath(root.x(), root.y());
             while(current.parent != undefined) {
                 path.push(current);
-                printPath(current.xy[0], current.xy[1]);
-                current = inQueue(current.parent, V);
+                printPath(current.x(), current.y());
+                current = findNode(current.parent, V);
             }
             printDestination(destx, desty);
             printResult('Number of steps: ' + path.length);
             return path.length;
         }
 
-        if(!inQueue(current, V)) {       
+        if(!findNode(current, V)) {       
             V.push(current);
 
-            var neighb = [ 
-                          {xy:[current.xy[0],   current.xy[1]+1] },
-                          {xy:[current.xy[0],   current.xy[1]-1] },
-                          {xy:[current.xy[0]+1, current.xy[1]]   },
-                          {xy:[current.xy[0]-1, current.xy[1]],  },
-            ];
+            var neighb = neighb4(current);
 
-            printSearch(current.xy[0], current.xy[1]);
+            printSearch(current.x(), current.y());
 
             for(i in neighb) {
                 var n = neighb[i];
-                var nx = n.xy[0];
-                var ny = n.xy[1];
+                var nx = n.x();
+                var ny = n.y();
                 if(!openSpace(nx, ny)) {
                     printWall(nx, ny);
                 }
-                if(inQueue(n, Q)) {
+                if(findNode(n, Q)) {
                     continue;
                 }
                 if(nx >= 0 && ny >= 0 && openSpace(nx, ny)) {             
                     printChecked(nx, ny);
                     if(n.distance == undefined ) {
                         n.distance = current.distance + 1;
-                        n.parent = {xy:[current.xy[0], current.xy[1]], distance:current.distance};
+                        n.parent = current;
                         maze[current.xy[0]][current.xy[1]] = n.distance;
                         Q.push(n);
                     }
@@ -108,19 +98,10 @@ function searchLoop(root, maxSteps) {
             }
         }
         setTimeout(function() { 
-            searchLoop(root, maxSteps);
+            searchLoopBF(root);
         }, 2);
     }    
     return path.length;
-}
-
-function inQueue(v, V) {
-    for(i in V) {
-        if(V[i].xy[0] == v.xy[0] && V[i].xy[1] == v.xy[1]) {
-            return V[i];
-        }
-    }
-    return 0;
 }
 
 function openSpace(x, y) {
@@ -130,6 +111,33 @@ function openSpace(x, y) {
     var count = krCount(f);
     var open = (count % 2) == 0;
     return open;
+}
+
+function findNode(v, V) {
+    for(i in V) {
+        if( V[i].x() == v.x() && V[i].y() == v.y() ) {
+            return V[i];
+        }
+    }
+    return 0;
+}
+
+function neighb4(node) {
+    return [Node(node.x(),     node.y() + 1 ), 
+    Node(node.x(),     node.y() - 1 ),
+    Node(node.x() + 1, node.y() ),
+    Node(node.x() - 1, node.y() ) ];
+}
+
+function Node(x, y) {
+    var n = { xy: [x,y],
+        distance: undefined, 
+        g: Number.MAX_SAFE_INTEGER, 
+        f: Number.MAX_SAFE_INTEGER,
+        x: function() { return this.xy[0]; },
+        y: function() { return this.xy[1]; },
+    };
+    return n;
 }
 
 function printPath(x,y) {
