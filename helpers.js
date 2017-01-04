@@ -15,7 +15,7 @@ var shortestPath = [ [ 7, 4 ], [ 6, 4 ], [ 6, 5 ], [ 5, 5 ], [ 4, 5 ], [ 4, 4 ],
 printTestArray();
 
 // BFS
-var path = breadthfirst(start, end, pathCheckTest);
+var path = BFS(start, end, pathCheckTest);
 if(path.length < 0) {
     console.log('Path finder failed');
 }
@@ -30,12 +30,23 @@ if(path.length < 0) {
 console.log('Path length: ' + path.length);
 
 // DFS
-path = depthfirst(start, end, pathCheckTest);
+path = DFS(start, end, pathCheckTest);
 if(path.length < 0) {
     console.log('Path finder failed');
 }
 console.log('Path length: ' + path.length);
 console.log(prettyPrintPath(path));
+
+// Now test with input from 2016/13
+path = BFS(Node(1,1), Node(31,39), openSpace);
+console.log(path.length);
+
+path = astar(Node(1,1), Node(31,39), openSpace, manhattan);
+console.log(path.length);
+
+path = DFS(Node(1,1), Node(31,39), openSpace, manhattan);
+console.log(path.length);
+/* END OF TEST */
 
 // A* by Tobias
 function astar(start, end, possiblePath, heuristic) {
@@ -56,7 +67,7 @@ function astar(start, end, possiblePath, heuristic) {
             var path = [];
             while(current.parent != undefined) {
                 path.push(current);
-                current = inQueue(current.parent, closed);
+                current = findNode(current.parent, closed);
             }
             console.log('Found in ' + steps + ' steps');
             return path;
@@ -66,7 +77,7 @@ function astar(start, end, possiblePath, heuristic) {
         var neighb = neighb4(current);
         for(i in neighb) {
             var n = neighb[i];
-            if(inQueue(n, closed)) {
+            if(findNode(n, closed)) {
                 continue;
             }
             if(!possiblePath(n.x(), n.y()) ) {             
@@ -75,7 +86,7 @@ function astar(start, end, possiblePath, heuristic) {
             }
 
             var tg = current.g + heuristic(current, n);
-            if(!inQueue(n, open)) {
+            if(!findNode(n, open)) {
                 open.push(n);
             } else if(tg >= n.g) {
                 continue; // Worse path
@@ -86,7 +97,7 @@ function astar(start, end, possiblePath, heuristic) {
             n.f = n.g + heuristic(n, end);
         }
     }
-
+    return -1;
 }
 
 function lowestF(open) {
@@ -109,7 +120,7 @@ function manhattan(from, to) {
 
 
 // Breadth First
-function breadthfirst(root, end, possiblePath) {
+function BFS(root, end, possiblePath) {
 
     console.log('BFS, looking for path from ' + root.xy + ' to ' + end.xy);
 
@@ -126,20 +137,20 @@ function breadthfirst(root, end, possiblePath) {
             var path = [];
             while(current.parent != undefined) {
                 path.push(current);
-                current = inQueue(current.parent, V);
+                current = findNode(current.parent, V);
             }
             console.log('Found in ' + steps + ' steps');
             return path;
         }
 
-        if(inQueue(current, V)) {
+        if(findNode(current, V)) {
             continue;
         }
         V.push(current);
         var neighb = neighb4(current);
         for(i in neighb) {
             var n = neighb[i];
-            if(inQueue(n, Q)) {
+            if(findNode(n, Q)) {
                 continue;
             }
             if( possiblePath(n.x(), n.y()) ) {             
@@ -157,7 +168,7 @@ function breadthfirst(root, end, possiblePath) {
 }
 
 // Depth first
-function depthfirst(start, end, possiblePath) {
+function DFS(start, end, possiblePath) {
     var S = [];
     var V = [];
     console.log('DepthFS, looking for path from ' + start.xy + ' to ' + end.xy);
@@ -170,13 +181,13 @@ function depthfirst(start, end, possiblePath) {
             var path = [];
             while(current.parent != undefined) {
                 path.push(current);
-                current = inQueue(current.parent, V);
+                current = findNode(current.parent, V);
             }
             console.log('Found in ' + steps + ' steps');
             return path;
         }
 
-        if(!inQueue(current, V)) {
+        if(!findNode(current, V)) {
             V.push(current);
             var neighb = neighb4(current);
             for(i in neighb) {
@@ -191,7 +202,7 @@ function depthfirst(start, end, possiblePath) {
     return -1;
 }
 
-function inQueue(v, V) {
+function findNode(v, V) {
     for(i in V) {
         if( V[i].x() == v.x() && V[i].y() == v.y() ) {
             return V[i];
@@ -258,3 +269,21 @@ function printTestArray() {
     console.log();
 }
 
+function openSpace(x, y) {
+    if(x < 0 || y < 0) {
+        return false;
+    }
+    var f = x*x + 3*x + 2*x*y + y + y*y;
+    f = f + parseInt(1352);
+
+    var count = krCount(f);
+    var open = (count % 2) == 0;
+    return open;
+}
+
+// Snodde en K&R algoritm for att rakna ettor
+function krCount(value) {
+    var count;
+    for (count = 0; value != 0; count++, value &= value-1);
+    return count;
+}
